@@ -18,7 +18,7 @@ In addition, following tools are used to control the environment:
 ## Docker Compose File
 The docker compose file stored at the root of this repo, may be used to create the instance of BOTS by issueing: 
 
-	docker-composer -f complete.yaml up 
+	docker-compose -f complete.yaml up 
 	
 
 Docker will then build BOTS based on Ubuntu 20.04 and Python 3.9. 

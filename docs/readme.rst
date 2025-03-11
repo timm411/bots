@@ -5,7 +5,7 @@ Bots-Edi
    :alt: Join the chat at https://gitter.im/bots-edi/Lobby
    :target: https://gitter.im/bots-edi/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
-.. image:: https://readthedocs.org/projects/bots/badge/?version=latest
+.. image:: https://readthedocs.org/projects/bots-edi/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
     :target: https://bots-edi.github.io/bots/
@@ -23,7 +23,7 @@ Bots-Edi
    :alt: Development Status
 
 .. image:: https://img.shields.io/pypi/pyversions/bots.svg
-   :target: https://pypi.python.org/pypi/bots
+   :target: https://pypi.org/project/bots/
    :alt: Python Versions
 
 .. image:: https://img.shields.io/pypi/l/bots.svg
