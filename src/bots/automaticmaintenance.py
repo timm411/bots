@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
 import sys
-if sys.version_info[0] > 2:
-    basestring = unicode = str
 from django.utils.translation import ugettext as _
 #bots-modules
 from . import botslib
@@ -86,9 +82,9 @@ def email_error_report(rootidtaofrun):
         break
     else:
         raise botslib.PanicError(_('In generate report: could not find report?'))
-    subject = _('[Bots Error Report] %(time)s') % {'time': unicode(results[str('ts')])[:16]}
+    subject = _('[Bots Error Report] %(time)s') % {'time': str(results[str('ts')])[:16]}
     reporttext = _('Bots Report; type: %(type)s, time: %(time)s\n') % {
-        'type': results[str('type')], 'time': unicode(results[str('ts')])[:19]}
+        'type': results[str('type')], 'time': str(results[str('ts')])[:19]}
     reporttext += _('    %d files received/processed in run.\n') % (results[str('lastreceived')])
     if results[str('lastdone')]:
         reporttext += _('    %d files without errors,\n') % (results[str('lastdone')])

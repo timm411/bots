@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-import sys
 import sqlite3
 import re
 
 reformatparamstyle = re.compile('%\((?P<name>[^)]+)\)s')
 
 sqlite3.register_adapter(bool, int)  # python type -> SQL type
-sqlite3.register_converter(str('BOOLEAN'), lambda s: bool(int(s)))  # SQL type -> python type
+sqlite3.register_converter("BOOLEAN", lambda s: bool(int(s)))  # SQL type -> python type
 
 
 def connect(database):
