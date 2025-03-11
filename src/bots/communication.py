@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-from __future__ import print_function
 import sys
-if sys.version_info[0] > 2:
-    basestring = unicode = str
 import os
 import posixpath
 import time
@@ -210,27 +206,27 @@ class _comsession(object):
             if archiveexternalname:
                 if self.channeldict['inorout'] == 'in':
                     # we have internal filename, get external
-                    absfilename = botslib.abspathdata(row[str('filename')])
-                    taparent = botslib.OldTransaction(idta=row[str('idta')])
+                    absfilename = botslib.abspathdata(row['filename'])
+                    taparent = botslib.OldTransaction(idta=row['idta'])
                     ta_list = botslib.trace_origin(ta=taparent, where={'status': EXTERNIN})
                     if ta_list:
                         archivename = os.path.basename(ta_list[-1].filename)
                     else:
-                        archivename = row[str('filename')]
+                        archivename = row['filename']
                 else:
                     # we have external filename, get internal
-                    archivename = os.path.basename(row[str('filename')])
-                    taparent = botslib.OldTransaction(idta=row[str('idta')])
+                    archivename = os.path.basename(row['filename'])
+                    taparent = botslib.OldTransaction(idta=row['idta'])
                     ta_list = botslib.trace_origin(ta=taparent, where={'status': FILEOUT})
                     absfilename = botslib.abspathdata(ta_list[0].filename)
             else:
                 # use internal name in archive
-                absfilename = botslib.abspathdata(row[str('filename')])
-                archivename = os.path.basename(row[str('filename')])
+                absfilename = botslib.abspathdata(row['filename'])
+                archivename = os.path.basename(row['filename'])
 
             if self.userscript and hasattr(self.userscript, 'archivename'):
                 archivename = botslib.runscript(self.userscript, self.scriptname, 'archivename', channeldict=self.channeldict, idta=row[
-                                                str('idta')], filename=absfilename)
+                                                'idta'], filename=absfilename)
 
             if archivezip:
                 archivezipfilehandler.write(absfilename, archivename)
@@ -266,22 +262,22 @@ class _comsession(object):
                                  {'idchannel': self.channeldict['idchannel'], 'status': FILEOUT,
                                   'statust': OK, 'idroute': self.idroute, 'rootidta': self.rootidta}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=FILEOUT)
                 ta_to.synall()  # needed for user exits: get all parameters of ta_to from database;
                 confirmtype = ''
                 confirmasked = False
-                charset = row[str('charset')]
+                charset = row['charset']
 
-                if row[str('editype')] == 'email-confirmation':  # outgoing MDN: message is already assembled
-                    outfilename = row[str('filename')]
+                if row['editype'] == 'email-confirmation':  # outgoing MDN: message is already assembled
+                    outfilename = row['filename']
                 else:  # assemble message: headers and payload. Bots uses simple MIME-envelope; by default payload is an attachment
                     message = email.message.Message()
                     #set frompartner/sender/'from' header
-                    frommail = row[str('frommail')]
+                    frommail = row['frommail']
                     if not frommail:
                         frommail, ccfrom_not_used_variable = self.idpartner2mailaddress(
-                            row[str('frompartner')])  # lookup email address for partnerID
+                            row['frompartner'])  # lookup email address for partnerID
                     message.add_header('From', frommail)
 
                     #set topartner/receiver/'to' header
@@ -289,12 +285,12 @@ class _comsession(object):
                     if self.userscript and hasattr(self.userscript, 'getmailaddressforreceiver'):
                         tomail, ccto = botslib.runscript(
                             self.userscript, self.scriptname, 'getmailaddressforreceiver', channeldict=self.channeldict, ta=ta_to)
-                    elif row[str('tomail')]:
-                        tomail = row[str('tomail')]
-                        ccto = row[str('cc')]
+                    elif row['tomail']:
+                        tomail = row['tomail']
+                        ccto = row['cc']
                     else:
                         tomail, ccto = self.idpartner2mailaddress(
-                            row[str('topartner')])  # lookup email address for partnerID
+                            row['topartner'])  # lookup email address for partnerID
                     message.add_header('To', tomail)
                     if ccto:
                         message.add_header('CC', ccto)
@@ -304,7 +300,7 @@ class _comsession(object):
                         email_datetime = email.utils.formatdate(timeval=time.mktime(
                             time.strptime('2013-01-23 01:23:45', '%Y-%m-%d %H:%M:%S')), localtime=True)
                     else:
-                        reference = email.utils.make_msgid(unicode(ta_to.idta))  # use transaction idta in message id.
+                        reference = email.utils.make_msgid(str(ta_to.idta))  # use transaction idta in message id.
                         email_datetime = email.utils.formatdate(localtime=True)
                     message.add_header('Message-ID', reference)
                     message.add_header('Date', email_datetime)
@@ -313,7 +309,7 @@ class _comsession(object):
                     #20150326  for now field 'reference' is max 70
                     #set Disposition-Notification-To: ask/ask not a a MDN?
                     if botslib.checkconfirmrules('ask-email-MDN', idroute=self.idroute, idchannel=self.channeldict['idchannel'],
-                                                 frompartner=row[str('frompartner')], topartner=row[str('topartner')]):
+                                                 frompartner=row['frompartner'], topartner=row['topartner']):
                         message.add_header('Disposition-Notification-To', frommail)
                         confirmtype = 'ask-email-MDN'
                         confirmasked = True
@@ -322,8 +318,8 @@ class _comsession(object):
                     if botsglobal.ini.getboolean('acceptance', 'runacceptancetest', False):
                         subject = '12345678'
                     else:
-                        subject = unicode(row[str('idta')])
-                    content = botslib.readdata_bin(row[str('filename')])  # get attachment from data file
+                        subject = str(row['idta'])
+                    content = botslib.readdata_bin(row['filename'])  # get attachment from data file
                     if self.userscript and hasattr(self.userscript, 'subject'):  # user exit to determine subject
                         subject = botslib.runscript(self.userscript, self.scriptname, 'subject',
                                                     channeldict=self.channeldict, ta=ta_to, subjectstring=subject, content=content)
@@ -348,7 +344,7 @@ class _comsession(object):
                     #set Content-Type and charset
                     charset = self.convertcodecformime(charset)
                     # contenttype is set in grammar.syntax
-                    message.add_header('Content-Type', row[str('contenttype')].lower(), charset=charset)
+                    message.add_header('Content-Type', row['contenttype'].lower(), charset=charset)
 
                     #set/change email header in user scripting
                     if self.userscript and hasattr(self.userscript, 'headers'):
@@ -367,7 +363,7 @@ class _comsession(object):
                         email.encoders.encode_base64(message)
 
                     #*******write email to file***************************
-                    outfilename = unicode(ta_to.idta)
+                    outfilename = str(ta_to.idta)
                     outfile = botslib.opendata_bin(outfilename, 'wb')
                     if sys.version_info[0] > 2:
                         generator = email.generator.BytesGenerator(outfile, mangle_from_=False, maxheaderlen=78)
@@ -430,7 +426,7 @@ class _comsession(object):
                         return 0
                 filesize = len(content)
                 ta_file = ta_from.copyta(status=FILEIN)
-                outfilename = unicode(ta_file.idta)
+                outfilename = str(ta_file.idta)
                 outfile = botslib.opendata_bin(outfilename, 'wb')
                 outfile.write(content)
                 outfile.close()
@@ -504,12 +500,12 @@ class _comsession(object):
                     time.strptime('2013-01-23 01:23:45', '%Y-%m-%d %H:%M:%S')), localtime=True)
             else:
                 # we first have to get the mda-ta to make this reference
-                mdn_reference = email.utils.make_msgid(unicode(ta_mdn.idta))
+                mdn_reference = email.utils.make_msgid(str(ta_mdn.idta))
                 mdn_datetime = email.utils.formatdate(localtime=True)
             message.add_header('Date', mdn_datetime)
             message.add_header('Message-ID', mdn_reference)
 
-            mdnfilename = unicode(ta_mdn.idta)
+            mdnfilename = str(ta_mdn.idta)
             mdnfile = botslib.opendata_bin(mdnfilename, 'wb')
             if sys.version_info[0] > 2:
                 generator = email.generator.BytesGenerator(mdnfile, mangle_from_=False, maxheaderlen=78)
@@ -549,8 +545,8 @@ class _comsession(object):
                 confirmasked = False
                 confirmidta = 0
                 #read & parse email
-                ta_from = botslib.OldTransaction(row[str('idta')])
-                infile = botslib.opendata_bin(row[str('filename')], 'rb')
+                ta_from = botslib.OldTransaction(row['idta'])
+                infile = botslib.opendata_bin(row['filename'], 'rb')
                 if sys.version_info[0] > 2:
                     msg = email.message_from_binary_file(infile)  # read and parse mail
                 else:
@@ -649,14 +645,14 @@ class _comsession(object):
                                     AND chanpar.idchannel_id=%(idchannel)s
                                     AND LOWER(chanpar.mail)=%(mail)s''',
                                  {'active': True, 'idchannel': self.channeldict['idchannel'], 'mail': mailaddress_lower}):
-            return row[str('idpartner')]
+            return row['idpartner']
         #if not found, check in partner-tabel (is less specific).
         for row in botslib.query('''SELECT idpartner
                                     FROM partner
                                     WHERE active=%(active)s
                                     AND LOWER(mail) = %(mail)s ''',
                                  {'active': True, 'mail': mailaddress_lower}):
-            return row[str('idpartner')]
+            return row['idpartner']
         return None  # indicate email address is unknown
 
     def idpartner2mailaddress(self, idpartner):
@@ -668,15 +664,15 @@ class _comsession(object):
                                     AND chanpar.idchannel_id=%(idchannel)s
                                     AND chanpar.idpartner_id=%(idpartner)s''',
                                  {'active': True, 'idchannel': self.channeldict['idchannel'], 'idpartner': idpartner}):
-            if row[str('mail')]:
-                return row[str('mail')], row[str('cc')]
+            if row['mail']:
+                return row['mail'], row['cc']
         for row in botslib.query('''SELECT mail,cc
                                     FROM partner
                                     WHERE active=%(active)s
                                     AND idpartner=%(idpartner)s''',
                                  {'active': True, 'idpartner': idpartner}):
-            if row[str('mail')]:
-                return row[str('mail')], row[str('cc')]
+            if row['mail']:
+                return row['mail'], row['cc']
         raise botslib.CommunicationOutError(_('No mail-address for partner "%(partner)s" (channel "%(idchannel)s").'),
                                             {'partner': idpartner, 'idchannel': self.channeldict['idchannel']})
 
@@ -728,8 +724,8 @@ class _comsession(object):
 
             def __format__(self, format_spec):
                 if not format_spec:
-                    return unicode(self)
-                name, ext = os.path.splitext(unicode(self))
+                    return str(self)
+                name, ext = os.path.splitext(str(self))
                 if format_spec == 'ext':
                     if ext.startswith('.'):
                         ext = ext[1:]
@@ -742,7 +738,7 @@ class _comsession(object):
         #this was astriks ('*') in bots<-3.2, is now {unique}. Reason for change: more options in format via python formatstrings
         #old way (asteriks) will keep working
         # create unique part for attachment-filename; stoe in ta-obejct so is assesible for {unique}
-        ta.unique = unicode(botslib.unique(self.channeldict['idchannel']))
+        ta.unique = str(botslib.unique(self.channeldict['idchannel']))
         tofilename = filename_mask.replace('*', '{unique}')  # replace 'old' way of making filenames unique by new way.
         ta.synall()
         if '{infile' in tofilename:
@@ -804,7 +800,7 @@ class file(_comsession):
                     else:
                         raise botslib.LockedFileError(_('Can not do a systemlock on this platform'))
                 #open tofile
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 tofile = botslib.opendata_bin(tofilename, 'wb')
                 #copy
                 shutil.copyfileobj(fromfile, tofile, 1048576)
@@ -858,7 +854,7 @@ class file(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:  # for each db-ta:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
                 #open tofile, incl syslock if indicated
                 tofilename = self.filename_formatter(filename_mask, ta_from)
@@ -872,7 +868,7 @@ class file(_comsession):
                     else:
                         raise botslib.LockedFileError(_('Can not do a systemlock on this platform'))
                 #open fromfile
-                fromfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                fromfile = botslib.opendata_bin(row['filename'], 'rb')
                 #copy
                 shutil.copyfileobj(fromfile, tofile, 1048576)
                 fromfile.close()
@@ -886,9 +882,9 @@ class file(_comsession):
                     os.rename(tofilename_old, tofilename)
             except:
                 txt = botslib.txtexc()
-                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row['numberofresends'] + 1)
             else:
-                ta_to.update(statust=DONE, filename=tofilename, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=DONE, filename=tofilename, numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -928,7 +924,7 @@ class pop3(_comsession):
                                                  fromchannel=self.channeldict['idchannel'], idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 mailid = int(mail.split()[0])  # first 'word' is the message number/ID
                 # alt: (header, messagelines, octets) = popsession.retr(messageID)
                 maillines = self.session.retr(mailid)[1]
@@ -1051,7 +1047,7 @@ class imap4(_comsession):
                                                  fromchannel=self.channeldict['idchannel'], idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                filename = unicode(ta_to.idta)
+                filename = str(ta_to.idta)
                 # Get the message (header and body)
                 response, msg_data = self.session.uid('fetch', mail, '(RFC822)')
                 filehandler = botslib.opendata_bin(filename, 'wb')
@@ -1116,7 +1112,7 @@ class smtp(_comsession):
     def login(self):
         if self.channeldict['username'] and self.channeldict['secret']:
             try:
-                #error in python 2.6.4....user and password can not be unicode
+                #error in python 2.6.4....user and password can not be str
                 self.session.login(str(self.channeldict['username']), str(self.channeldict['secret']))
             except smtplib.SMTPAuthenticationError:
                 raise botslib.CommunicationOutError(_('SMTP server did not accept user/password combination.'))
@@ -1140,21 +1136,21 @@ class smtp(_comsession):
                                  {'status': FILEOUT, 'statust': OK, 'rootidta': self.rootidta,
                                      'tochannel': self.channeldict['idchannel']}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
-                addresslist = row[str('tomail')].split(',') + row[str('cc')].split(',')
+                addresslist = row['tomail'].split(',') + row['cc'].split(',')
                 addresslist = [x.strip() for x in addresslist if x.strip()]
-                sendfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                sendfile = botslib.opendata_bin(row['filename'], 'rb')
                 msg = sendfile.read()
                 sendfile.close()
-                self.session.sendmail(row[str('frommail')], addresslist, msg)
+                self.session.sendmail(row['frommail'], addresslist, msg)
             except:
                 txt = botslib.txtexc()
                 ta_to.update(statust=ERROR, errortext=txt, filename='smtp://' + self.channeldict[
-                             'username'] + '@' + self.channeldict['host'], numberofresends=row[str('numberofresends')] + 1)
+                             'username'] + '@' + self.channeldict['host'], numberofresends=row['numberofresends'] + 1)
             else:
                 ta_to.update(statust=DONE, filename='smtp://' + self.channeldict['username'] + '@' + self.channeldict[
-                             'host'], numberofresends=row[str('numberofresends')] + 1)
+                             'host'], numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -1239,7 +1235,7 @@ class ftp(_comsession):
         try:  # some ftp servers give errors when directory is empty; catch these errors here
             files = self.session.nlst()
         except (ftplib.error_perm, ftplib.error_temp) as msg:
-            if unicode(msg)[:3] not in ['550', '450']:
+            if str(msg)[:3] not in ['550', '450']:
                 raise
 
         lijst = fnmatch.filter(files, self.channeldict['filename'])
@@ -1252,7 +1248,7 @@ class ftp(_comsession):
                                                  idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 try:
                     if self.channeldict['ftpbinary']:
                         tofile = botslib.opendata_bin(tofilename, 'wb')
@@ -1261,7 +1257,7 @@ class ftp(_comsession):
                         tofile = botslib.opendata(tofilename, 'wb', charset='latin-1')  # python3 gives back a 'string'.
                         self.session.retrlines('RETR ' + fromfilename, writeline_callback)
                 except ftplib.error_perm as msg:
-                    if unicode(msg)[:3] in ['550', ]:  # we are trying to download a directory...
+                    if str(msg)[:3] in ['550', ]:  # we are trying to download a directory...
                         raise botslib.BotsError('To be catched')
                     else:
                         raise
@@ -1319,10 +1315,10 @@ class ftp(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
                 tofilename = self.filename_formatter(filename_mask, ta_from)
-                fromfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                fromfile = botslib.opendata_bin(row['filename'], 'rb')
                 if self.channeldict['ftpbinary']:
                     self.session.storbinary(mode + tofilename, fromfile)
                 else:
@@ -1337,10 +1333,10 @@ class ftp(_comsession):
             except:
                 txt = botslib.txtexc()
                 ta_to.update(statust=ERROR, errortext=txt, filename='ftp:/' + posixpath.join(self.dirpath,
-                                                                                             tofilename), numberofresends=row[str('numberofresends')] + 1)
+                                                                                             tofilename), numberofresends=row['numberofresends'] + 1)
             else:
                 ta_to.update(statust=DONE, filename='ftp:/' + posixpath.join(self.dirpath,
-                                                                             tofilename), numberofresends=row[str('numberofresends')] + 1)
+                                                                             tofilename), numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -1546,7 +1542,7 @@ class sftp(_comsession):
                                                  idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 # SSH treats all files as binary. paramiko doc says: b-flag is ignored
                 fromfile = self.session.open(fromfilename, 'r')
                 content = fromfile.read()
@@ -1597,10 +1593,10 @@ class sftp(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
                 tofilename = self.filename_formatter(filename_mask, ta_from)
-                fromfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                fromfile = botslib.opendata_bin(row['filename'], 'rb')
                 # SSH treats all files as binary. paramiko doc says: b-flag is ignored
                 tofile = self.session.open(tofilename, mode)
                 tofile.write(fromfile.read())
@@ -1615,10 +1611,10 @@ class sftp(_comsession):
             except:
                 txt = botslib.txtexc()
                 ta_to.update(statust=ERROR, errortext=txt, filename='sftp:/' + posixpath.join(self.dirpath,
-                                                                                              tofilename), numberofresends=row[str('numberofresends')] + 1)
+                                                                                              tofilename), numberofresends=row['numberofresends'] + 1)
             else:
                 ta_to.update(statust=DONE, filename='sftp:/' + posixpath.join(self.dirpath,
-                                                                              tofilename), numberofresends=row[str('numberofresends')] + 1)
+                                                                              tofilename), numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -1654,7 +1650,7 @@ class xmlrpc(_comsession):
                                                  idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 tofile = botslib.opendata_bin(tofilename, 'wb')
                 simplejson.dump(content, tofile, skipkeys=False, ensure_ascii=False, check_circular=False)
                 tofile.close()
@@ -1692,17 +1688,17 @@ class xmlrpc(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
-                fromfile = botslib.opendata(row[str('filename')], 'rb', row[str('charset')])
+                fromfile = botslib.opendata(row['filename'], 'rb', row['charset'])
                 content = fromfile.read()
                 fromfile.close()
                 response = self.xmlrpc_call(content)
             except:
                 txt = botslib.txtexc()
-                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row['numberofresends'] + 1)
             else:
-                ta_to.update(statust=DONE, filename=self.filename, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=DONE, filename=self.filename, numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -1766,7 +1762,7 @@ class db(_comsession):
                                                  idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 botslib.writedata_pickled(tofilename, db_object)
                 filesize = os.path.getsize(botslib.abspathdata(tofilename))
             except:
@@ -1796,7 +1792,7 @@ class db(_comsession):
                                     AND tochannel=%(tochannel)s ''',
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta, 'status': FILEOUT, 'statust': OK}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
                 db_object = botslib.readdata_pickled(filename=self.ta_info['filename'])
                 botslib.runscript(self.userscript, self.scriptname, 'outcommunicate',
@@ -1804,10 +1800,10 @@ class db(_comsession):
             except:
                 txt = botslib.txtexc()
                 ta_to.update(statust=ERROR, errortext=txt, filename=self.channeldict[
-                             'path'], numberofresends=row[str('numberofresends')] + 1)
+                             'path'], numberofresends=row['numberofresends'] + 1)
             else:
                 ta_to.update(statust=DONE, filename=self.channeldict[
-                             'path'], numberofresends=row[str('numberofresends')] + 1)
+                             'path'], numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -1864,7 +1860,7 @@ class communicationscript(_comsession):
                     fromfile = open(fromfilename, 'rb')
                     filesize = os.fstat(fromfile.fileno()).st_size
                     #open tofile
-                    tofilename = unicode(ta_to.idta)
+                    tofilename = str(ta_to.idta)
                     tofile = botslib.opendata_bin(tofilename, 'wb')
                     #copy
                     shutil.copyfileobj(fromfile, tofile, 1048576)
@@ -1902,7 +1898,7 @@ class communicationscript(_comsession):
                     ta_to = ta_from.copyta(status=FILEIN)
                     remove_ta = True
                     fromfile = open(fromfilename, 'rb')
-                    tofilename = unicode(ta_to.idta)
+                    tofilename = str(ta_to.idta)
                     tofile = botslib.opendata_bin(tofilename, 'wb')
                     content = fromfile.read()
                     filesize = len(content)
@@ -1951,14 +1947,14 @@ class communicationscript(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:  # for each db-ta:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
                 tofilename = self.filename_formatter(filename_mask, ta_from)
                 #open tofile
                 tofilename = botslib.join(outputdir, tofilename)
                 tofile = open(tofilename, mode)
                 #open fromfile
-                fromfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                fromfile = botslib.opendata_bin(row['filename'], 'rb')
                 #copy
                 shutil.copyfileobj(fromfile, tofile, 1048576)
                 fromfile.close()
@@ -1969,9 +1965,9 @@ class communicationscript(_comsession):
                         os.remove(tofilename)
             except:
                 txt = botslib.txtexc()
-                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row['numberofresends'] + 1)
             else:
-                ta_to.update(statust=DONE, filename=tofilename, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=DONE, filename=tofilename, numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -2005,13 +2001,13 @@ class trash(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:  # for each db-ta:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
             except:
                 txt = botslib.txtexc()
-                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=ERROR, errortext=txt, numberofresends=row['numberofresends'] + 1)
             else:
-                ta_to.update(statust=DONE, filename='', numberofresends=row[str('numberofresends')] + 1)
+                ta_to.update(statust=DONE, filename='', numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 
@@ -2061,7 +2057,7 @@ class http(_comsession):
                                                  idroute=self.idroute)
                 ta_to = ta_from.copyta(status=FILEIN)
                 remove_ta = True
-                tofilename = unicode(ta_to.idta)
+                tofilename = str(ta_to.idta)
                 tofile = botslib.opendata_bin(tofilename, 'wb')
                 tofile.write(outResponse.content)
                 tofile.close()
@@ -2102,9 +2098,9 @@ class http(_comsession):
                                  {'tochannel': self.channeldict['idchannel'], 'rootidta': self.rootidta,
                                      'status': FILEOUT, 'statust': OK}):
             try:
-                ta_from = botslib.OldTransaction(row[str('idta')])
+                ta_from = botslib.OldTransaction(row['idta'])
                 ta_to = ta_from.copyta(status=EXTERNOUT)
-                fromfile = botslib.opendata_bin(row[str('filename')], 'rb')
+                fromfile = botslib.opendata_bin(row['filename'], 'rb')
                 content = fromfile.read()
                 fromfile.close()
                 #communicate via requests library
@@ -2121,10 +2117,10 @@ class http(_comsession):
             except:
                 txt = botslib.txtexc()
                 ta_to.update(statust=ERROR, errortext=txt, filename=self.url.uri(
-                    filename=row[str('filename')]), numberofresends=row[str('numberofresends')] + 1)
+                    filename=row['filename']), numberofresends=row['numberofresends'] + 1)
             else:
                 ta_to.update(statust=DONE, filename=self.url.uri(
-                    filename=row[str('filename')]), numberofresends=row[str('numberofresends')] + 1)
+                    filename=row['filename']), numberofresends=row['numberofresends'] + 1)
             finally:
                 ta_from.update(statust=DONE)
 

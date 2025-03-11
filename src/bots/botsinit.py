@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import sys
 if sys.version_info[0] > 2:
-    basestring = unicode = str
     import configparser as ConfigParser
 else:
     import ConfigParser
@@ -145,7 +143,7 @@ def initbotscharsets():
     #eg: 'checkcharsetin':'botsreplace',  #strict, ignore or botsreplace
     # in case of errors: the 'wrong' character is replaced with char as set in
     # bots.ini. Default value in bots.ini is ' ' (space)
-    botsglobal.botsreplacechar = unicode(botsglobal.ini.get('settings', 'botsreplacechar', ' '))
+    botsglobal.botsreplacechar = botsglobal.ini.get('settings', 'botsreplacechar', ' ')
     codecs.register_error('botsreplace', botsreplacechar_handler)  # need to register the handler for botsreplacechar
     #set aliases for the charsets in bots.ini
     for key, value in botsglobal.ini.items('charsets'):
