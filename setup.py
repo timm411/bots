@@ -58,12 +58,12 @@ long_description = (
     )
 
 install_requires = [
-    'Cherrypy>3.1.0',
-    'click',
-    'Django>=1.4.0',
-    'future',
+    'CherryPy==18.6.1',
+    'click==8.0.3',
+    'Django==3.2.9',
+    'future==0.18.2',
     'setuptools',
-    'six',
+    'six==1.16.0',
     ]
 
 extras_require = {
@@ -76,7 +76,7 @@ extras_require = {
         'Genshi',    # for using templates/mapping to HTML)
         'paramiko',  # SFTP
         'pdfminer',  # parse pdf-files
-        'pycrypto',  # SFTP
+        'pycryptodome',  # SFTP
         'xlrd',      # parse excel-files
         ],
     }

@@ -21,7 +21,7 @@ The docker compose file stored at the root of this repo, may be used to create t
 	docker-composer -f complete.yaml up 
 	
 
-Docker will then build BOTS based on Ubuntu 16:04 and Python 2.7. 
+Docker will then build BOTS based on Ubuntu 20.04 and Python 3.9. 
 Supervisor's http log-in can be passwort protected through environment variables, here defined as SUPERVUSER and SUPERVPASS. 
 
 Port 8080 is used to provide BOTS Web interface
@@ -47,9 +47,9 @@ After the build, one can connect to the terminal as follows:
 To share local direcotires with the dockerized BOTS instance, add following to the corresponding entries (example below)docker-compose file. 
 
 	volumes:
-      - ./config:/usr/local/lib/python2.7/dist-packages/bots/config
-      - ./botssys:/usr/local/lib/python2.7/dist-packages/bots/botssys
-      - ./usersys:/usr/local/lib/python2.7/dist-packages/bots/usersys
+      - ./config:/usr/local/lib/python3.9/dist-packages/bots/config
+      - ./botssys:/usr/local/lib/python3.9/dist-packages/bots/botssys
+      - ./usersys:/usr/local/lib/python3.9/dist-packages/bots/usersys
 
 
 	
