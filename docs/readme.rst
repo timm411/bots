@@ -63,5 +63,23 @@ License
 Bots is licenced under GNU GENERAL PUBLIC LICENSE Version 3; for full
 text: http://www.gnu.org/copyleft/gpl.html
 
+Versions
+--------
+
+- 3.3.1 (unreleased)
+  - Release date: TBD
+
+- 3.3.0 (2016-11-23)
+  - Release date: 2016-11-23
+
+- 3.2.0 (2014-09-02)
+  - Release date: 2014-09-02
+
+- 3.2.0rc2 (2014-05-27)
+  - Release date: 2014-05-27
+
+- 3.2.0rc (2013-05-27)
+  - Release date: 2013-05-27
+
 .. _Henk-Jan Ebbers: http://bots.sourceforge.net/en/index.shtml
 .. _documentation: https://bots-edi.github.io/bots
